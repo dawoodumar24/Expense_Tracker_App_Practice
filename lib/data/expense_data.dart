@@ -1,8 +1,9 @@
 import 'package:expense_tracker_app/Date_Time/date_time_helper.dart';
+import 'package:expense_tracker_app/data/hive_database.dart';
 import 'package:expense_tracker_app/models/expense_item.dart';
 import 'package:flutter/material.dart';
 
-class ExpenseData {
+class ExpenseData extends ChangeNotifier{
   // list of all expenses
   List<ExpenseItems> overallExpenseList = [];
 
@@ -12,14 +13,30 @@ class ExpenseData {
     return overallExpenseList;
   }
 
+  //prepare data to display
+
+  final db = HiveDataBase();
+  void prepareData() {
+    //if there exists data , get it
+    if(db.readData().isNotEmpty){
+      overallExpenseList = db.readData();
+    }
+  }
+
   // add new expense
   void addNewExpense(ExpenseItems newExpense) {
     overallExpenseList.add(newExpense);
+
+    notifyListeners();
+    db.saveData(overallExpenseList);
   }
 
   // delete expense
   void deleteExpense(ExpenseItems expense) {
     overallExpenseList.remove(expense);
+
+    notifyListeners();
+    db.saveData(overallExpenseList);
   }
 
   // get weekday(Mon, Tue etc) from dateTime object
